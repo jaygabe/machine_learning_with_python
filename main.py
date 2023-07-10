@@ -1,0 +1,302 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from zlib import crc32
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
+from pandas.plotting import scatter_matrix
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.pairwise import rbf_kernel
+from sklearn.linear_model import LinearRegression
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.preprocessing import FunctionTransformer
+
+
+########################################################################
+# UPLOAD THE DATA
+# Required modules:
+from pathlib import Path
+import urllib.request
+import tarfile
+import pandas as pd
+# Create a function called load_housing_data
+# Use built-in Path function to import data from the datasets directory
+# Store the Path(file) inside a variable called tarball_path
+# This enables us to see if this is a file
+# If it is not a file
+# Use the Path function to create a directory called "datasets"
+# Set parents=True to ensure all directories required are created
+# Set exist_ok=True to ensure we don't get error if already exists
+########################################################################
+def load_housing_data():
+    tarball_path = Path("datasets/housing.tgz")
+    if not tarball_path.is_file():
+        Path("datasets").mkdir(parents=True, exist_ok=True)
+        url = "https://github.com/ageron/data/raw/main/housing.tgz"
+        urllib.request.urlretrieve(url, tarball_path)
+        with tarfile.open(tarball_path) as housing_tarball:
+            housing_tarball.extractall(path="datasets")
+    return pd.read_csv(Path("datasets/housing/housing.csv"))
+
+
+housing = load_housing_data()
+print(housing.head())
+print(housing.info())
+print(housing["ocean_proximity"].value_counts())
+print(housing.describe())
+
+IMAGES_PATH = Path() / "images" / "end_to_end_project"
+IMAGES_PATH.mkdir(parents=True, exist_ok=True)
+
+
+# def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
+#     path = IMAGES_PATH / f"{fig_id}.fig_extension"
+#     if tight_layout:
+#         plt.tight_layout()
+#     plt.savefig(path, format=fig_extension, dpi=resolution)
+#
+#
+# # extra code - the next 5 lines define the default font sizes
+# plt.rc('font', size=14)
+# plt.rc('axes', labelsize=14, titlesize=14)
+# plt.rc('legend', fontsize=14)
+# plt.rc('xtick', labelsize=10)
+# plt.rc('ytick', labelsize=10)
+#
+# housing.hist(bins=50, figsize=(12, 8))
+# save_fig("attribute_histogram_plots")  # extra code
+# plt.show()
+
+
+# def shuffle_and_split_data(data, test_ratio):
+#     shuffled_indices = np.random.permutation(len(data))
+#     test_set_size = int(len(data) * test_ratio)
+#     test_indices = shuffled_indices[:test_set_size]
+#     train_indices = shuffled_indices[test_set_size:]
+#     return data.iloc[train_indices], data.iloc[test_indices]
+
+
+"""
+    This is how you split the data entirely RANDOMLY
+"""
+# train_set, test_set = shuffle_and_split_data(housing, 0.2)
+# print("Length of training set:", len(train_set))
+# print("Length of test set:", len(test_set))
+
+# np.random.seed(42)
+
+
+# def is_id_in_test_set(identifier, test_ratio):
+#     return crc32(np.int64(identifier)) < test_ratio * 2**32
+#
+#
+# def split_data_with_id_hash(data, test_ratio, id_column):
+#     ids = data[id_column]
+#     in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
+#     return data.loc[~in_test_set], data.loc[in_test_set]
+
+
+# housing_with_id = housing.reset_index()  # adds an `index` column
+# train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
+# print(len(test_set))
+# print(len(train_set))
+# housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
+# train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
+# print(len(test_set))
+# print(len(train_set))
+# train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+# print(len(test_set))
+# print(len(train_set))
+# print(test_set["total_bedrooms"].isnull().sum())
+
+housing["income_cat"] = pd.cut(housing["median_income"], bins=[0., 1.5, 3.0, 4.5, 6., np.inf], labels=[1, 2, 3, 4, 5])
+# housing["income_cat"].value_counts().sort_index().plot.bar(rot=0, grid=True)
+# plt.xlabel("Income category")
+# plt.ylabel("Number of districts")
+# # save_fig("housing_income_cat_bar_plot")  # extra code
+# plt.show()
+
+""" from sklearn.model_selection import StratifiedShuffleSplit """
+splitter = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=42)
+strat_splits = []
+for train_index, test_index in splitter.split(housing, housing["income_cat"]):
+    strat_train_set_n = housing.iloc[train_index]
+    strat_test_set_n = housing.iloc[test_index]
+    strat_splits.append([strat_train_set_n, strat_test_set_n])
+
+strat_train_set_n, strat_test_set_n = strat_splits[0]
+strat_train_set, strat_test_set = train_test_split(housing, test_size=0.2, stratify=housing["income_cat"], random_state=42)
+print(strat_test_set["income_cat"].value_counts() / len(strat_test_set))
+
+"""
+    EXPLORING THE TRAINING DATA
+"""
+print("Training Data: ", strat_train_set)
+print("Test Data: ", strat_test_set)
+
+# Make a copy of the original so we can refer to it later
+housing_training_copy = strat_train_set.copy()
+
+# housing.plot(kind="scatter", x="longitude", y="latitude", grid=True)
+# plt.show()
+#
+# housing.plot(kind="scatter", x="longitude", y="latitude", grid=True, alpha=0.2)
+# plt.show()
+
+"""
+    Plot data by latitude and longitude
+    Use size of circle to determine population
+    Use color of circle to determine house value
+"""
+# housing.plot(kind="scatter", x="longitude", y="latitude", grid=True, s=housing["population"] / 100, label="population", c="median_house_value", cmap="jet", colorbar=True, sharex=False, figsize=(10, 7))
+# plt.show()
+
+"""
+    Find a correlations between the data
+    Only found one between median_house_value and median_income (linear)
+    Printed on command line
+"""
+# numeric_columns = housing.select_dtypes(include={np.number})
+# corr_matrix = numeric_columns.corr()
+# print(corr_matrix["median_house_value"].sort_values(ascending=False))
+# # # Visualized with a graph ^^^
+# attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
+# scatter_matrix(housing[attributes], figsize=(12, 8))
+# plt.show()
+
+"""
+    Plot median_income against median_house_value to see linear relationship
+"""
+# housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1, grid=True)
+# plt.show()
+
+"""
+    Use the data to:
+    1) Find rooms per house by dividing total_rooms by households
+    2) Find bedroom ration by dividing total_bedrooms by total_rooms
+    3) Find people_per_house by dividing population by households
+"""
+housing["rooms_per_house"] = housing["total_rooms"] / housing["households"]
+housing["bedrooms_ratio"] = housing["total_bedrooms"] / housing["total_rooms"]
+housing["people_per_house"] = housing["population"] / housing["households"]
+
+numeric_columns = housing.select_dtypes(include={np.number})
+corr_matrix = numeric_columns.corr()
+print(corr_matrix["median_house_value"].sort_values(ascending=False))
+
+"""
+    Preparing the Data for Machine Learning Algorithms
+"""
+housing = strat_train_set.drop("median_house_value", axis=1)
+housing_labels = strat_train_set["median_house_value"].copy()
+print(housing)
+print(housing_labels)
+
+"""
+    Clean the data
+"""
+# housing.dropna(subset=["total_bedrooms"], inplace=True) # Get rid of corresponding districts
+housing.drop("total_bedrooms", axis=1) # Get rid of the whole attribute
+
+# CHOOSE OPTION 3
+median = housing["total_bedrooms"].median() # Set missing value as median
+housing["total_bedrooms"].fillna(median, inplace=True)
+
+# CHOOSE OPTION 3 BUT USE BUILT-IN SCIKIT-LEARN CLASS
+"""
+    Using scikit-learn class allows us to impute missing values on the training set,
+    BUT ALSO on the validation and test set, and any new data added to the set
+"""
+imputer = SimpleImputer(strategy="median")
+# attain only numerical columns
+housing_num = housing.select_dtypes(include=[np.number])
+# Fit imputer instance to the training data using the fit() method
+imputer.fit(housing_num)
+print(imputer.statistics_)
+print(housing_num.median().values)
+X = imputer.transform(housing_num)
+
+# Wrap X in a Dataframe and recover the column names and index from housing_num
+housing_tr = pd.DataFrame(X, columns=housing_num.columns, index=housing_num.index)
+
+"""
+    Handling Text and Categorical Attributes
+"""
+housing_cat = housing[["ocean_proximity"]]
+print(housing_cat.head(8))
+#
+# # Convert these categories from text to numbers
+ordinal_encoder = OrdinalEncoder()
+housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
+print(housing_cat_encoded)
+print(ordinal_encoder.categories_)
+
+"""
+    Use one-hot encoding to prevent errors with categorical data
+"""
+cat_encoder = OneHotEncoder()
+housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
+print(housing_cat_1hot)
+print(housing_cat_1hot.toarray())
+print(cat_encoder.categories_)
+# Print the categories with one-hot representation
+df_test = pd.DataFrame({"ocean_proximity": ["INLAND", "NEAR BAY"]})
+print(pd.get_dummies(df_test))
+
+print(cat_encoder.transform(df_test))
+
+df_test_unknown = pd.DataFrame({"ocean_proximity": ["<2H OCEAN", "ISLAND"]})
+pd.get_dummies(df_test_unknown)
+
+print(cat_encoder.feature_names_in_)
+print(cat_encoder.get_feature_names_out())
+
+# df_output = pd.DataFrame(cat_encoder.transform(df_test_unknown), columns=cat_encoder.get_feature_names_out(),
+#                          index=df_test_unknown.index)
+
+"""
+    Feature Scaling and Transformation
+"""
+# Min-max Scaling
+min_max_scaler = MinMaxScaler(feature_range=(-1, 1))
+housing_num_min_max_scaled = min_max_scaler.fit_transform(housing_num)
+print(housing_num_min_max_scaled)
+
+#Standardization
+std_scaler = StandardScaler()
+housing_num_std_scaled = std_scaler.fit_transform(housing_num)
+print(housing_num_std_scaled)
+
+age_simil_35 = rbf_kernel(housing[["housing_median_age"]], [[35]], gamma=0.1)
+print("RBF Kernel: ", age_simil_35)
+
+# Create scatterplot of rbf results
+plt.figure(figsize=(10, 6))
+plt.scatter(housing["housing_median_age"], age_simil_35)
+plt.xlabel('Housing Median Age')
+plt.ylabel('RBF Kernel Similarity with Age 35')
+plt.title('RBF Kernel Similarity vs. Housing Median Age')
+plt.grid(True)
+plt.show()
+
+target_scaler = StandardScaler()
+scaled_labels = target_scaler.fit_transform(housing_labels.to_frame())
+model = LinearRegression()
+model.fit(housing[["median_income"]], scaled_labels)
+some_new_data = housing[["median_income"]].iloc[:5] # pretend this is new data
+scaled_predictions = model.predict(some_new_data)
+predictions = target_scaler.inverse_transform(scaled_predictions)
+print("Predictions 1:", predictions)
+
+
+model = TransformedTargetRegressor(LinearRegression(), transformer=StandardScaler())
+model.fit(housing[["median_income"]], housing_labels)
+predictions = model.predict(some_new_data)
+print("Predictions 2:", predictions)
+
+log_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
+log_pop = log_transformer.transform(housing[["population"]])
+print(log_pop)
