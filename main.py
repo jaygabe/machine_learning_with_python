@@ -1,5 +1,4 @@
-import matplotlib.pyplot as plt
-import numpy as np
+
 from zlib import crc32
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedShuffleSplit
@@ -64,11 +63,11 @@ def load_housing_data():
 ###########################################################################
 # VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - V
 ###########################################################################
-
 # Execute the load_housing_data function to store data in housing variable
 # Display first five rows with the .head() method
 # Display summary of Dataframe with the .info() method
 # Display descriptive statistics with the .describe() method
+# Find details about vectors based on ocean proximity
 ###########################################################################
 # VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - VIEW DATA - V
 ###########################################################################
@@ -79,53 +78,90 @@ print("Info:")
 print(housing.info())
 # Standard Deviation, Mean, Quartiles, Min, Max, and more
 print("Describe:")
-print(housing.describe(include='all'))
+print(housing.describe())
 print(housing["ocean_proximity"].value_counts())
 ###########################################################################
 ###########################################################################
 ###########################################################################
 
-# IMAGES_PATH = Path() / "images" / "end_to_end_project"
-# IMAGES_PATH.mkdir(parents=True, exist_ok=True)
-#
-#
-# # def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
-# #     path = IMAGES_PATH / f"{fig_id}.fig_extension"
-# #     if tight_layout:
-# #         plt.tight_layout()
-# #     plt.savefig(path, format=fig_extension, dpi=resolution)
-# #
-# #
-# # # extra code - the next 5 lines define the default font sizes
-# # plt.rc('font', size=14)
-# # plt.rc('axes', labelsize=14, titlesize=14)
-# # plt.rc('legend', fontsize=14)
-# # plt.rc('xtick', labelsize=10)
-# # plt.rc('ytick', labelsize=10)
-# #
-# # housing.hist(bins=50, figsize=(12, 8))
-# # save_fig("attribute_histogram_plots")  # extra code
-# # plt.show()
-#
-#
-# # def shuffle_and_split_data(data, test_ratio):
-# #     shuffled_indices = np.random.permutation(len(data))
-# #     test_set_size = int(len(data) * test_ratio)
-# #     test_indices = shuffled_indices[:test_set_size]
-# #     train_indices = shuffled_indices[test_set_size:]
-# #     return data.iloc[train_indices], data.iloc[test_indices]
-#
-#
-# """
-#     This is how you split the data entirely RANDOMLY
-# """
-# # train_set, test_set = shuffle_and_split_data(housing, 0.2)
-# # print("Length of training set:", len(train_set))
-# # print("Length of test set:", len(test_set))
-#
-# # np.random.seed(42)
-#
-#
+
+###########################################################################
+# SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FI
+###########################################################################
+# Required modules:
+# from pathlib import Path
+import matplotlib.pyplot as plt
+# Create a new path object of "/images/end_to_end_project"
+# Create the new directories
+# Create function to save figure/plot
+# Create the path to save the image with the fig_id and extension as file
+# if tight_layout is set to true, execute tight_layout on plot
+# Save figure to file with plot.savefig() method
+# Set default plot font size to 14
+# Set default value for labels and titles to 14
+# Set the font size for the legend to 14
+# Set font size on ytick and xtick to 14
+# Create a histogram with the housing Dataframe
+# Save housing histogram with our save_fig function
+# Display housing histogram with plot.show() method
+###########################################################################
+# SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FI
+###########################################################################
+IMAGES_PATH = Path() / "images" / "end_to_end_project"
+IMAGES_PATH.mkdir(parents=True, exist_ok=True)
+
+
+def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
+    path = IMAGES_PATH / f"{fig_id}.fig_extension"
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(path, format=fig_extension, dpi=resolution)
+
+
+plt.rc('font', size=14)
+plt.rc('axes', labelsize=14, titlesize=14)
+plt.rc('legend', fontsize=14)
+plt.rc('xtick', labelsize=10)
+plt.rc('ytick', labelsize=10)
+
+housing.hist(bins=50, figsize=(12, 8))
+save_fig("attribute_histogram_plots")
+plt.show()
+###########################################################################
+###########################################################################
+###########################################################################
+
+
+###########################################################################
+# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
+###########################################################################
+# Required modules:
+import numpy as np
+###########################################################################
+# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
+###########################################################################
+
+
+# RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - R
+def shuffle_and_split_data(data, test_ratio):
+    shuffled_indices = np.random.permutation(len(data))
+    test_set_size = int(len(data) * test_ratio)
+    test_indices = shuffled_indices[:test_set_size]
+    train_indices = shuffled_indices[test_set_size:]
+    return data.iloc[train_indices], data.iloc[test_indices]
+
+
+train_set, test_set = shuffle_and_split_data(housing, 0.2)
+print("Length of training set:", len(train_set))
+print("Length of test set:", len(test_set))
+
+np.random.seed(42)
+# RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - R
+
+
+
+
+
 # # def is_id_in_test_set(identifier, test_ratio):
 # #     return crc32(np.int64(identifier)) < test_ratio * 2**32
 # #
