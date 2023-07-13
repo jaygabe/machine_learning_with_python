@@ -1,6 +1,5 @@
 
-from zlib import crc32
-from sklearn.model_selection import train_test_split
+
 from sklearn.model_selection import StratifiedShuffleSplit
 from pandas.plotting import scatter_matrix
 from sklearn.impute import SimpleImputer
@@ -137,54 +136,79 @@ plt.show()
 ###########################################################################
 # Required modules:
 import numpy as np
+from zlib import crc32
+from sklearn.model_selection import train_test_split
+# Set random seed to 42, so we always get the same training and test set
+# Use the number of elements in the Dataframe create permutation of indices
+# Find out what our test set size is with the len of data * test_ratio
+# Use test_set_size to create list of test_indices with shuffled_indices
+# Use test_set_size to create list of train_indices with shuffled_indices
+# Return two Dataframes: training set and test set
+# Execute function to create train_set and test_sets
+# Print the length of each set for confirmation
 ###########################################################################
 # CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
 ###########################################################################
 
+# RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
 
-# RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - R
-def shuffle_and_split_data(data, test_ratio):
-    shuffled_indices = np.random.permutation(len(data))
-    test_set_size = int(len(data) * test_ratio)
-    test_indices = shuffled_indices[:test_set_size]
-    train_indices = shuffled_indices[test_set_size:]
-    return data.iloc[train_indices], data.iloc[test_indices]
-
-
-train_set, test_set = shuffle_and_split_data(housing, 0.2)
-print("Length of training set:", len(train_set))
-print("Length of test set:", len(test_set))
-
-np.random.seed(42)
-# RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - RANDOM TEST SET - R
-
-
-
-
-
-# # def is_id_in_test_set(identifier, test_ratio):
-# #     return crc32(np.int64(identifier)) < test_ratio * 2**32
-# #
-# #
-# # def split_data_with_id_hash(data, test_ratio, id_column):
-# #     ids = data[id_column]
-# #     in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
-# #     return data.loc[~in_test_set], data.loc[in_test_set]
+# np.random.seed(42)
 #
 #
-# # housing_with_id = housing.reset_index()  # adds an `index` column
-# # train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
-# # print(len(test_set))
-# # print(len(train_set))
-# # housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
-# # train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
-# # print(len(test_set))
-# # print(len(train_set))
-# # train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
-# # print(len(test_set))
-# # print(len(train_set))
-# # print(test_set["total_bedrooms"].isnull().sum())
+# def shuffle_and_split_data(data, test_ratio):
+#     shuffled_indices = np.random.permutation(len(data))
+#     test_set_size = int(len(data) * test_ratio)
+#     test_indices = shuffled_indices[:test_set_size]
+#     train_indices = shuffled_indices[test_set_size:]
+#     return data.iloc[train_indices], data.iloc[test_indices]
 #
+#
+# train_set, test_set = shuffle_and_split_data(housing, 0.2)
+# print("Length of training set:", len(train_set))
+# print("Length of test set:", len(test_set))
+
+# RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
+
+
+# HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
+
+
+def is_id_in_test_set(identifier, test_ratio):
+    return crc32(np.int64(identifier)) < test_ratio * 2**32
+
+
+def split_data_with_id_hash(data, test_ratio, id_column):
+    ids = data[id_column]
+    in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
+    return data.loc[~in_test_set], data.loc[in_test_set]
+
+
+housing_with_id = housing.reset_index()  # adds an `index` column
+train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
+print(len(test_set))
+print(len(train_set))
+housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
+train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
+print(len(test_set))
+print(len(train_set))
+
+# HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
+
+# SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
+
+train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+print(len(test_set))
+print(len(train_set))
+
+# SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
+
+print(test_set["total_bedrooms"].isnull().sum())
+
+###########################################################################
+###########################################################################
+###########################################################################
+
+
 # housing["income_cat"] = pd.cut(housing["median_income"], bins=[0., 1.5, 3.0, 4.5, 6., np.inf], labels=[1, 2, 3, 4, 5])
 # # housing["income_cat"].value_counts().sort_index().plot.bar(rot=0, grid=True)
 # # plt.xlabel("Income category")
