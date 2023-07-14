@@ -88,7 +88,7 @@ print(housing["ocean_proximity"].value_counts())
 # SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FIGURE - SAVE A FI
 ###########################################################################
 # Required modules:
-# from pathlib import Path
+# from pathlib import Path (Already Declared)
 import matplotlib.pyplot as plt
 # Create a new path object of "/images/end_to_end_project"
 # Create the new directories
@@ -138,6 +138,13 @@ plt.show()
 import numpy as np
 from zlib import crc32
 from sklearn.model_selection import train_test_split
+###########################################################################
+# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
+###########################################################################
+
+###########################################################################
+# RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
+###########################################################################
 # Set random seed to 42, so we always get the same training and test set
 # Use the number of elements in the Dataframe create permutation of indices
 # Find out what our test set size is with the len of data * test_ratio
@@ -147,10 +154,8 @@ from sklearn.model_selection import train_test_split
 # Execute function to create train_set and test_sets
 # Print the length of each set for confirmation
 ###########################################################################
-# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
-###########################################################################
-
 # RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
+###########################################################################
 
 # np.random.seed(42)
 #
@@ -167,10 +172,23 @@ from sklearn.model_selection import train_test_split
 # print("Length of training set:", len(train_set))
 # print("Length of test set:", len(test_set))
 
+###########################################################################
 # RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
+###########################################################################
 
-
+###########################################################################
 # HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
+###########################################################################
+# Create a function that determines whether an instance is in the test set
+# If the hash is less than 858993459.2, return false, otherwise true
+# Create an object of ids that are present in test set
+# Use id series to apply a Lambda function and retrieve a true/false series
+# Return training set and test set with in_test_set and negated in_test_set
+# Use .reset_index on housing Dataframe to ensure index field exists
+# Execute split_data_with_id_hash with housing_with_id, 0.2 ratio and index
+###########################################################################
+# HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
+###########################################################################
 
 
 def is_id_in_test_set(identifier, test_ratio):
@@ -185,24 +203,26 @@ def split_data_with_id_hash(data, test_ratio, id_column):
 
 housing_with_id = housing.reset_index()  # adds an `index` column
 train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
-print(len(test_set))
-print(len(train_set))
+print("Hashed Test Set:", len(test_set))
+print("Hashed Training Set: ", len(train_set))
 housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
-train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
-print(len(test_set))
-print(len(train_set))
+# train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
+# print(len(test_set))
+# print(len(train_set))
 
+###########################################################################
 # HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
+###########################################################################
 
 # SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
 
-train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
-print(len(test_set))
-print(len(train_set))
+# train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+# print(len(test_set))
+# print(len(train_set))
 
 # SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
 
-print(test_set["total_bedrooms"].isnull().sum())
+# print(test_set["total_bedrooms"].isnull().sum())
 
 ###########################################################################
 ###########################################################################
