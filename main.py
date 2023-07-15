@@ -130,21 +130,20 @@ plt.show()
 ###########################################################################
 ###########################################################################
 
-
+###########################################################################
+###########################################################################
 ###########################################################################
 # CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
 ###########################################################################
-# Required modules:
-import numpy as np
-from zlib import crc32
-from sklearn.model_selection import train_test_split
 ###########################################################################
-# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
 ###########################################################################
 
 ###########################################################################
 # RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - RANDOM - R
 ###########################################################################
+# Required modules:
+import numpy as np
+from zlib import crc32
 # Set random seed to 42, so we always get the same training and test set
 # Use the number of elements in the Dataframe create permutation of indices
 # Find out what our test set size is with the len of data * test_ratio
@@ -186,47 +185,86 @@ from sklearn.model_selection import train_test_split
 # Return training set and test set with in_test_set and negated in_test_set
 # Use .reset_index on housing Dataframe to ensure index field exists
 # Execute split_data_with_id_hash with housing_with_id, 0.2 ratio and index
+# Create new id column by multiplying long value by 1000 and adding lat
+# Execute split_data_with_id_hash with housing_with_id, 0.2 ratio and id
 ###########################################################################
 # HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
 ###########################################################################
 
 
-def is_id_in_test_set(identifier, test_ratio):
-    return crc32(np.int64(identifier)) < test_ratio * 2**32
-
-
-def split_data_with_id_hash(data, test_ratio, id_column):
-    ids = data[id_column]
-    in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
-    return data.loc[~in_test_set], data.loc[in_test_set]
-
-
-housing_with_id = housing.reset_index()  # adds an `index` column
-train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
-print("Hashed Test Set:", len(test_set))
-print("Hashed Training Set: ", len(train_set))
-housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
+# def is_id_in_test_set(identifier, test_ratio):
+#     return crc32(np.int64(identifier)) < test_ratio * 2**32
+#
+#
+# def split_data_with_id_hash(data, test_ratio, id_column):
+#     ids = data[id_column]
+#     in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
+#     return data.loc[~in_test_set], data.loc[in_test_set]
+#
+#
+# housing_with_id = housing.reset_index()  # adds an `index` column
+# train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "index")
+# print("Hashed Test Set (Index):", len(test_set))
+# print("Hashed Training Set (Index): ", len(train_set))
+# housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
 # train_set, test_set = split_data_with_id_hash(housing_with_id, 0.2, "id")
-# print(len(test_set))
-# print(len(train_set))
+# print("Hashed Test Set (Id):", len(test_set))
+# print("Hashed Training Set (Id):", len(train_set))
 
 ###########################################################################
 # HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - HASHED - H
 ###########################################################################
 
+###########################################################################
 # SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
-
-# train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
-# print(len(test_set))
-# print(len(train_set))
-
+###########################################################################
+# Required Modules:
+from sklearn.model_selection import train_test_split
+# Use train_test_set from scikit learn to create test and training sets
+# Find out how many instances have a null value for total_bedrooms
+###########################################################################
 # SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
+###########################################################################
 
-# print(test_set["total_bedrooms"].isnull().sum())
+train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+print("Scikit Learn Test Set:", len(test_set))
+print("Scikit Learn Training Set:", len(train_set))
+
+sumOfNullFeatures = test_set["total_bedrooms"].isnull().sum()
+print("sumOfNullFeatures: ", sumOfNullFeatures)
+
+###########################################################################
+# SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN - SCIKIT-LEARN
+###########################################################################
+
+###########################################################################
+# Stratified Sampling - # Stratified Sampling - # Stratified Sampling - # S
+###########################################################################
+# Required Modules:
+from scipy.stats import binom
+###########################################################################
+# Stratified Sampling - # Stratified Sampling - # Stratified Sampling - # S
+###########################################################################
+
+sample_size = 1000
+ratio_female = 0.511
+proba_too_small = binom(sample_size, ratio_female).cdf(485 - 1)
+proba_too_large = 1 - binom(sample_size, ratio_female).cdf(535)
+print("Probability of incorrect ratio: ", proba_too_small + proba_too_large)
+
+###########################################################################
+# Stratified Sampling - # Stratified Sampling - # Stratified Sampling - # S
+###########################################################################
 
 ###########################################################################
 ###########################################################################
 ###########################################################################
+# CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - CREATE TEST SET - C
+###########################################################################
+###########################################################################
+###########################################################################
+
+
 
 
 # housing["income_cat"] = pd.cut(housing["median_income"], bins=[0., 1.5, 3.0, 4.5, 6., np.inf], labels=[1, 2, 3, 4, 5])
